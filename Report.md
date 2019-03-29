@@ -33,11 +33,11 @@ UPDATE_STEP = 4         # Step size for updating the networks
 Environment solved in 90 episodes!	Average Score: 30.12
 
 ## Importance of Exploration
-Initially, it was very difficult to achieve a score above 1 regardless of network architecture and hyper-parameters. It turns out that the OpenAI Gym implementation of DDPG which was used as a baseline had a bug in the implementation of the [Ornstein–Uhlenbeck process](https://en.wikipedia.org/wiki/Ornstein%E2%80%93Uhlenbeck_process). Good exploration is probably the most important factor to training a successful agent.  It is crucial to have a lot of exploration in the beginning and less exploration when the agent has learned a could policy. To this end, I implemented a schedule to either sample an action from the OU-process or the policy depending on the progress of training. In particular, the exploration probability is: 
+Initially, it was very difficult to achieve a score above 1 regardless of network architecture and hyper-parameters. It turns out that the OpenAI Gym implementation of DDPG which was used as a baseline had a bug in the implementation of the [Ornstein–Uhlenbeck process](https://en.wikipedia.org/wiki/Ornstein%E2%80%93Uhlenbeck_process). Good exploration is probably the most important factor to training a successful agent.  It is crucial to have a lot of exploration in the beginning and less exploration when the agent has learned a good policy. To this end, a schedule was implemented to either sample an action from the noise process or the learned policy depending on the progress of training. In particular, the exploration probability is: 
 ```python
 p = np.clip(1 - np.sqrt(i_episode/n_episodes), 0, 1) 
 ```
-Based on this probability, exploration noise can be added in two different ways, *fuse* or *threshold*.  In the option *fuse* the exploration noise is fused with an action from the policy proportional to the probability. In the option *threshold* we choose between policy action and exploration noise using the probability as a threshold. In our experiments both approaches yield similar results. The implementation is shown below.
+Based on this probability, exploration noise can be added in two different ways, *fuse* or *threshold*.  In the option *fuse* the exploration noise is fused with an action from the policy proportional to the probability. In the option *threshold* the action is chosen either from the policy or the noise process using the probability as a threshold. In the experiments both approaches yield similar results. The implementation is shown below.
 ```python
 if noise_apply == 'fuse':
     if noise_type == 'ou':
@@ -56,7 +56,7 @@ elif noise_apply == 'threshold':
 
 When training the the agent, it became apparent that it is quite sensitive to the network architecture (actor and critic) and training parameters. While the current agent learns to solve the task quite quickly, further performance boost could certainly be achieved by further hyper-parameter tuning. 
 
-Also[prioritized experience replay](https://arxiv.org/abs/1511.05952) could help to further boost performance. In conventional DDPG experiences are samples from the replay memory proportial to the frequency they occured. Priority experience replay, as the name suggests, prioritizes experiences containing important transitions and samples them more frequently. This leads to more effienct training.
+Also [prioritized experience replay](https://arxiv.org/abs/1511.05952) could help to further boost performance. In conventional DDPG experiences are samples from the replay memory proportial to the frequency they occured. Priority experience replay, as the name suggests, prioritizes experiences containing important transitions and samples them more frequently. This leads to more effienct training.
 
 ### Crawler Environment
 
